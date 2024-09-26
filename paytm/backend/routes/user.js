@@ -37,17 +37,25 @@ router.post("/signup", async (req, res) => {
     fullName: body.fullName,
   });
 
+  const userId = createdUser._id;
+
+  const account = await User.Account.create({
+    userId: userId,
+    balance: Math.random() * 10000 + 1,
+  });
+
   const token = jwt.sign(
     {
-      userId: createdUser._id,
+      userId: userId,
     },
     JWT_SECRET
   );
 
   res.status(201).json({
-    message: "user is Registered successfully",
+    message: "user is Registered successfully and account is added",
     data: createdUser,
     token: token,
+    account: account,
   });
 });
 
