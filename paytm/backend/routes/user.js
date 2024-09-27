@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const zod = require("zod");
 const jwt = require("jsonwebtoken");
-const User = require("../db.js");
+const { User, Account } = require("../db.js");
 const JWT_SECRET = require("../config.js");
+const { authMiddleware } = require("../middlewares/auth.js");
 
 // sign up and sigin in routes
 // using zod for valdiation
@@ -23,7 +24,7 @@ router.post("/signup", async (req, res) => {
     });
   }
 
-  const user = await User.findOne({ usernamme: body.usernamme });
+  const user = await User.findOne({ username: req.body.username });
 
   if (user) {
     return res.status(404).json({
@@ -39,7 +40,7 @@ router.post("/signup", async (req, res) => {
 
   const userId = createdUser._id;
 
-  const account = await User.Account.create({
+  const account = await Account.create({
     userId: userId,
     balance: Math.random() * 10000 + 1,
   });
@@ -48,8 +49,16 @@ router.post("/signup", async (req, res) => {
     {
       userId: userId,
     },
-    JWT_SECRET
+    JWT_SECRET,
+    { expiresIn: "1h" }
   );
+
+  res.cookie("token", token, {
+    httpOnly: true, // Prevents JavaScript access to the cookie
+    secure: true, // Ensure the cookie is sent only over HTTPS
+    sameSite: "Strict", // Prevents CSRF attacks
+    maxAge: 3600000, // 1 hour expiry
+  });
 
   res.status(201).json({
     message: "user is Registered successfully and account is added",
@@ -58,13 +67,59 @@ router.post("/signup", async (req, res) => {
     account: account,
   });
 });
+const loginBody = zod.object({
+  username: zod.string().email(),
+  password: zod.string(),
+});
+
+router.post("/login", async (req, res) => {
+  const { success } = loginBody.safeParse(req.body);
+
+  if (!success) {
+    return res.status(411).json({
+      message: "Incorrect inputs",
+    });
+  }
+
+  const user = await User.findOne({ username: req.body.username });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  if (user.password !== req.body.password) {
+    return res.status(401).json({ message: "Invalid password" });
+  }
+
+  const token = jwt.sign(
+    {
+      userId: user._id,
+    },
+    JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+
+  res.cookie("token", token, {
+    httpOnly: true, // Prevents JavaScript access to the cookie
+    secure: true, // Ensure the cookie is sent only over HTTPS
+    sameSite: "Strict", // Prevents CSRF attacks
+    maxAge: 3600000, // 1 hour expiry
+  });
+  res.json({ message: "User logged in successfully", token: token });
+  return;
+});
+
+router.post("/logout", async (req, res) => {
+  res.clearCookie("token"); // Clear the cookie
+  return res.status(200).json({ message: "User logged out successfully" });
+});
 
 const updatedBody = zod.object({
   password: zod.string().optional(),
   fullName: zod.string().optional(),
 });
 
-router.put("/update", async (req, res) => {
+router.put("/update", authMiddleware, async (req, res) => {
   const { success } = updatedBody.safeParse(req.body);
 
   if (!success) {
@@ -82,8 +137,8 @@ router.put("/update", async (req, res) => {
   });
 });
 
-router.get("/bulk", async (req, res) => {
-  const filter = req.query.filter || "";
+router.get("/bulk", authMiddleware, async (req, res) => {
+  const filter = req.query.filter;
 
   const users = await User.find({
     fullName: { $regex: filter, $options: "i" },

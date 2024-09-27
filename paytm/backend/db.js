@@ -9,20 +9,30 @@ try {
   console.log("some error while connection");
 }
 const userSchema = new mongoose.Schema({
-  username: String,
-  password: String,
-  fullName: String,
+  username: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  fullName: {
+    type: String,
+    required: true,
+  },
 });
 
 const accountSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    requred: true,
+    required: true,
   },
   balance: {
     type: Number,
-    requried: true,
+    required: true,
   },
 });
 

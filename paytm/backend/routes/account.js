@@ -1,13 +1,13 @@
-const { mongo } = require("mongoose");
+const mongoose = require("mongoose");
 const { Account, User } = require("../db");
 const { authMiddleware } = require("../middlewares/auth");
 
-const express = reqiuire("express");
+const express = require("express");
 
 const router = express.Router();
 
 router.get("/getbalance", authMiddleware, async (req, res) => {
-  const userId = req.body.userId;
+  const userId = req.userId;
   const accountofUser = await Account.findOne({ userId: userId });
 
   const balance = accountofUser.balance;
@@ -69,3 +69,5 @@ router.post("/transfer", authMiddleware, async (req, res) => {
     message: "Transfer successful",
   });
 });
+
+module.exports = router;
