@@ -1,5 +1,5 @@
 node_modules/
 .DS_Store
-/paytm/backend/config.js
+paytm/backend/config.js
 weather-dashboard
 node_modules
