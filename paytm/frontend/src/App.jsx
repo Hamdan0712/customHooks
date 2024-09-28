@@ -2,9 +2,9 @@ import { useState } from 'react'
 import {BrowserRouter,Routes,Route} from "react-router-dom";
 
 import './App.css'
-import { Signup } from './components/Signup.jsx';
-import { Login } from './components/Login.jsx';
-import { Dashboard } from './components/Dashboard.jsx';
+import { Signup } from './components/pages/Signup.jsx';
+import { Login } from './components/pages/Login.jsx';
+import { Dashboard } from './components/pages/Dashboard.jsx';
 
 function App() {
 
