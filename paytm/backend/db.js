@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
+const MONGODB_URI = require("./config.js");
 
 try {
-  mongoose.connect(
-    "mongodb+srv://hamdanaveed07:123@cluster0.aaddj7r.mongodb.net/users"
-  );
+  mongoose.connect(`${MONGODB_URI}`);
   console.log("Connected to db");
 } catch (err) {
   console.log("some error while connection");
