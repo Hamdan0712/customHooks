@@ -72,6 +72,21 @@ const loginBody = zod.object({
   password: zod.string(),
 });
 
+router.get("/profile", authMiddleware, async (req, res) => {
+  const userId = req.userId;
+
+  const user = await User.findOne({ _id: userId });
+  const userBalance = await Account.findOne({ userId: userId });
+
+  return res.status(200).json({
+    message: "User data fetched successfully",
+    user: {
+      username: user.fullName,
+      balance: userBalance.balance,
+    },
+  });
+});
+
 router.post("/login", async (req, res) => {
   const { success } = loginBody.safeParse(req.body);
 
@@ -138,10 +153,11 @@ router.put("/update", authMiddleware, async (req, res) => {
 });
 
 router.get("/bulk", authMiddleware, async (req, res) => {
-  const filter = req.query.filter;
+  const filter = req.query.filter || "";
 
   const users = await User.find({
     fullName: { $regex: filter, $options: "i" },
+    _id: { $ne: req.userId },
   });
 
   res.json({
