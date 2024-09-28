@@ -5,12 +5,14 @@ import { Inputs } from "../elements/Inputs.jsx";
 import { Button } from "../elements/Button.jsx";
 import { Already } from "../elements/Already.jsx";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 export const Signup=()=>{
 
     const [fullName,setFullname]=useState("");
     const [username,setUsername]=useState("");
     const [password,setPassword]=useState("");
 
+    const navigate=useNavigate();
   
 
     return (
@@ -27,7 +29,19 @@ export const Signup=()=>{
                  <Inputs onchange={e=>{setUsername(e.target.value)}} label={"Username"} placeholder={"hamdanaveed@07@gmail.com"} type={"email"} ></Inputs>
 
                  <Inputs onchange={e=>{setPassword(e.target.value)}} label={"Password"} placeholder={"123456"} type={"password"} ></Inputs>
-                    <Button onClick={async()=>{await axios.post("http://localhost:3000/api/v1/user/signup",{fullName:fullName,username:username,password:password})}} text={"Sign-up"}></Button>
+                    <Button onClick={async()=>{
+                      const response=  await axios.post("http://localhost:3000/api/v1/user/signup",{
+                        withCredentials:true
+                      },
+                      {
+                        fullName:fullName
+                      ,username:username
+                      ,password:password
+                      }
+                      )
+                      navigate('/dashboard')
+                      
+                      }} text={"Sign-up"}></Button>
                 <Already a={"Sign-in"} to={'/login'} text={"Already Have an Account? "}></Already>
 
         </div>

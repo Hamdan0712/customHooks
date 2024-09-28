@@ -6,8 +6,11 @@ import { Button } from "../elements/Button.jsx";
 import { Already } from "../elements/Already.jsx";
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 export const Login=()=>{
 
+const navigate=useNavigate();
 const [username,setusername]=useState("");
 const [password,setpassword]=useState("");
 
@@ -28,6 +31,7 @@ const [password,setpassword]=useState("");
                         await axios.post("http://localhost:3000/api/v1/user/login",{username:username,password:password},{
                             withCredentials:true
                         })
+                        navigate('/dashboard')
                        }} text={"Login"}></Button>
                    <Already  a={"Sign-up"} to={'/'}   text={"Don't  Have an Account? "}></Already>
    

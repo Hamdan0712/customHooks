@@ -3,8 +3,10 @@ import {Balance} from "../elements/Balance"
 import { Users } from "../elements/Users"
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export const Dashboard=()=>{
+    const navigate=useNavigate();
 
     const [balance,setBalance]=useState(0);
     const [username,setUsername]=useState("");
@@ -27,7 +29,14 @@ export const Dashboard=()=>{
 
     return(
         <div className="bg-slate-300 w-screen h-screen">
-            <Navbar text={"Paytm"} username={username}></Navbar>
+            <Navbar onclick={async()=>{
+                await axios.post("http://localhost:3000/api/v1/user/logout",{
+                    withCredentials:true
+                }).then(()=>{
+                    navigate('/')
+                })
+                
+            }} text={"Paytm"} username={username}></Navbar>
             <Balance balance={balance}></Balance>
             <Users username={"Hamdan"}></Users>
             
